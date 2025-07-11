@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       userName: user.name,
     });
 
-    cookies().set("token", token, {
+    (await cookies()).set("token", token, {
       httpOnly: true,
       secure: true,
       maxAge: 60 * 60, // 1 hour
