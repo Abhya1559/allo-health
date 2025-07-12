@@ -20,7 +20,11 @@ export async function GET(request: NextRequest) {
     if (location) where.location = ILike(`%${location}%`);
     if (available_time) where.available_time = ILike(`%${available_time}%`);
 
-    return NextResponse.json(doctors, { status: 200 });
+    const doctorList = await doctors.find({ where });
+    return NextResponse.json(
+      doctorList.map((doc) => ({ ...doc })),
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error fetching doctors:", error);
     return NextResponse.json(

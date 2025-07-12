@@ -13,7 +13,7 @@ export default async function handler(
     const doctors = await doctorRepo.find();
     return res.status(200).json(doctors);
   } catch (error) {
-    console.error("❌ Database error:", error);
+    console.error(" Database error:", error);
     return res.status(500).json({ message: "Database error" });
   }
 }
