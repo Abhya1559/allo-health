@@ -1,11 +1,24 @@
 import { NextResponse, NextRequest } from "next/server";
 import { initDB } from "@/lib/init-db";
 import { Doctor } from "@/models/Doctor";
+import { ILike } from "typeorm";
 
 export async function GET(request: NextRequest) {
   try {
     const db = await initDB();
-    const doctors = await db.getRepository(Doctor).find(); // ← fixed
+    const doctors = db.getRepository(Doctor);
+
+    const { searchParams } = new URL(request.url);
+
+    const specialization = searchParams.get("specialization");
+    const location = searchParams.get("location");
+    const available_time = searchParams.get("available_time");
+
+    const where: any = {};
+
+    if (specialization) where.specialization = ILike(`%${specialization}%`);
+    if (location) where.location = ILike(`%${location}%`);
+    if (available_time) where.available_time = ILike(`%${available_time}%`);
 
     return NextResponse.json(doctors, { status: 200 });
   } catch (error) {
