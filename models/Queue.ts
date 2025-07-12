@@ -19,6 +19,9 @@ export class Queue {
   @Column()
   status!: string; // waiting | with doctor | completed
 
+  @Column({ default: false })
+  priority!: boolean;
+
   @CreateDateColumn()
   created_at!: Date;
 }
