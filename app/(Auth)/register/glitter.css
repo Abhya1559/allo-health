@@ -1,0 +1,97 @@
+/* hospitalBackground.css */
+.hospital-background {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+              radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridMove 10s linear infinite;
+  position: absolute;
+  z-index: 0;
+  opacity: 0.25;
+}
+
+/* Animated background movement */
+@keyframes gridMove {
+  0% {
+    background-position: 0 0, 20px 20px;
+  }
+  100% {
+    background-position: 40px 40px, 60px 60px;
+  }
+}
+
+/* Heartbeat Pulse Line */
+.heartbeat-line {
+  width: 100%;
+  max-width: 320px;
+  height: 60px;
+  background: transparent;
+  position: relative;
+}
+
+.heartbeat-line::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  top: 50%;
+  background: white;
+  animation: pulse 2s linear infinite;
+  clip-path: polygon(
+    0% 50%,
+    5% 50%,
+    10% 30%,
+    12% 70%,
+    14% 30%,
+    16% 50%,
+    20% 50%,
+    24% 20%,
+    26% 80%,
+    28% 20%,
+    30% 50%,
+    100% 50%
+  );
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+/* Gradient Glow with movement */
+.hospital-bg-glow {
+  background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.08), transparent 70%),
+              radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.05), transparent 70%);
+  animation: shimmer 12s ease-in-out infinite;
+  filter: blur(40px);
+  opacity: 0.6;
+}
+
+/* Shimmer movement */
+@keyframes shimmer {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  50% {
+    transform: translate(20px, -10px);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+/* Vertical pulse bar animation */
+@keyframes pulseBar {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-pulseBar {
+  animation: pulseBar 2s linear infinite;
+}

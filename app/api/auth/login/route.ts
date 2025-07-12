@@ -11,40 +11,40 @@ export async function POST(request: NextRequest) {
     const { email, password } = body;
 
     if (!email || !password) {
-      return NextResponse.json({ error: "all fields are required" });
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
     }
+
     const db = await initDB();
     const userRepo = db.getRepository(User);
     const user = await userRepo.findOneBy({ email });
 
     if (!user) {
-      return NextResponse.json({
-        error: "user not exist in data please register ",
-      });
+      return NextResponse.json(
+        { error: "User does not exist. Please register." },
+        { status: 404 }
+      );
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return NextResponse.json({ error: "credential error" }, { status: 402 });
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 }
+      );
     }
 
-    const token = signJwt({
+    const token = await signJwt({
       userId: user.id,
       userEmail: user.email,
       userName: user.name,
     });
 
-    (await cookies()).set("token", token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 60 * 60, // 1 hour
-      path: "/",
-      sameSite: "lax",
-    });
-
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
-        message: "user logged in successful",
+        message: "User logged in successfully",
         user: {
           id: user.id,
           name: user.name,
@@ -54,10 +54,20 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
+
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60, // 1 hour
+      path: "/",
+      sameSite: "lax",
+    });
+
+    return response;
   } catch (error) {
-    console.error("server error while login", error);
+    console.error("Server error during login:", error);
     return NextResponse.json(
-      { error: "Server error while login" },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

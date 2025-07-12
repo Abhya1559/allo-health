@@ -2,11 +2,12 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST() {
-  //   (await cookies()).set("token", "", {
-  //     maxAge: 0,
-  //     path: "/",
-  //   });
-  (await cookies()).delete("token");
+  const response = NextResponse.json({ message: "Logged out" });
 
-  return NextResponse.json({ message: "Logged out" });
+  response.cookies.set("token", "", {
+    path: "/",
+    maxAge: 0,
+  });
+
+  return response;
 }

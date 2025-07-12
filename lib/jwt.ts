@@ -1,15 +1,29 @@
-import jwt from "jsonwebtoken";
+// lib/jwt.ts
+import { SignJWT, jwtVerify, JWTPayload } from "jose";
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
+const JWT_SECRET = process.env.JWT_SECRET!;
+const secret = new TextEncoder().encode(JWT_SECRET);
 
-export function signJwt(payload: object, expiresIn = "1h") {
-  return jwt.sign(payload, JWT_SECRET!, { expiresIn });
+/** Sign a JWT (Edge Compatible) */
+export async function signJwt(
+  payload: JWTPayload,
+  expiresIn = "1h"
+): Promise<string> {
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime(expiresIn)
+    .sign(secret);
 }
 
-export function verifyJwt<T>(token: string): T | null {
+/** Verify a JWT (Edge Compatible) */
+export async function verifyJwt<T = JWTPayload>(
+  token: string
+): Promise<T | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as T;
+    const { payload } = await jwtVerify(token, secret);
+    return payload as T;
   } catch (err) {
+    console.warn("Invalid JWT:", err);
     return null;
   }
 }

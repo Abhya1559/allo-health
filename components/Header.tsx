@@ -1,17 +1,35 @@
 "use client";
+
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { headerData } from "@/app/constants";
-import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
+import LogoutButton from "@/app/(Auth)/logout/page";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/verify");
+        const data = await res.json();
+        setIsAuthenticated(!!data.user);
+      } catch (error) {
+        setIsAuthenticated(false);
+      }
+    }
+    checkAuth();
+  }, []);
 
   return (
     <header className="bg-white z-50 fixed top-0 w-full shadow-md">
       <div className="flex items-center justify-between px-6 py-4">
-        <h1 className="text-2xl font-bold text-purple-600">Allo Health</h1>
+        <Link href="/">
+          <h1 className="text-2xl font-bold text-purple-600">Allo Health</h1>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-5">
@@ -28,19 +46,25 @@ export default function Header() {
 
         {/* Desktop Buttons */}
         <div className="hidden md:flex gap-3 items-center">
-          <Link href="/login">
-            <Button
-              variant={"link"}
-              className="text-md font-medium cursor-pointer hover:text-purple-900"
-            >
-              Login
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button className="rounded-xl cursor-pointer bg-purple-600 hover:bg-purple-700">
-              Sign up
-            </Button>
-          </Link>
+          {isAuthenticated ? (
+            <LogoutButton onLogout={() => setIsAuthenticated(false)} />
+          ) : (
+            <>
+              <Link href="/login">
+                <Button
+                  variant="link"
+                  className="text-md font-medium cursor-pointer hover:text-purple-900"
+                >
+                  Login
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button className="rounded-xl cursor-pointer bg-purple-600 hover:bg-purple-700">
+                  Sign up
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Hamburger Icon */}
@@ -67,16 +91,36 @@ export default function Header() {
             ))}
           </nav>
           <div className="flex flex-col gap-2">
-            <Button
-              variant={"link"}
-              className="text-md font-medium cursor-pointer hover:text-purple-900"
-              onClick={() => setIsOpen(false)}
-            >
-              Login
-            </Button>
-            <Button className="rounded-xl cursor-pointer bg-purple-600 hover:bg-purple-700">
-              Sign up
-            </Button>
+            {isAuthenticated ? (
+              <Link href="/logout">
+                <Button
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Logout
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button
+                    variant="link"
+                    className="text-md font-medium cursor-pointer hover:text-purple-900"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button
+                    className="rounded-xl cursor-pointer bg-purple-600 hover:bg-purple-700"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Sign up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

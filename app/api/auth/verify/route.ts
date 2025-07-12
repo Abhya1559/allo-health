@@ -1,10 +1,12 @@
-import { verifyJwt } from "@/lib/jwt";
+import { getUserFromRequest } from "@/lib/get-user-from-request";
+import { NextRequest, NextResponse } from "next/server";
 
-export function getUserFromRequest(request: Request) {
-  const authHeader = request.headers.get("authorized");
+export async function GET(request: NextRequest) {
+  const user = await getUserFromRequest(request);
+  console.log(user);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-  if (!authHeader?.startsWith("Bearer ")) return null;
-
-  const token = authHeader.split(" ")[1];
-  return verifyJwt<{ userId: number; email: string }>(token);
+  return NextResponse.json({ user }, { status: 200 });
 }
