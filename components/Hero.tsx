@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
+import HeroImage from "@/public/img.jpg";
 
 export default function Hero() {
   return (
@@ -56,7 +57,7 @@ export default function Hero() {
         >
           <Image
             className="rounded-xl w-full h-auto shadow-lg"
-            src="/img.jpg"
+            src={HeroImage}
             alt="Hero Image"
             width={600}
             height={600}
