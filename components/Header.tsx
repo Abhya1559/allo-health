@@ -18,6 +18,7 @@ export default function Header() {
         const data = await res.json();
         setIsAuthenticated(!!data.user);
       } catch (error) {
+        console.log(error);
         setIsAuthenticated(false);
       }
     }

@@ -111,8 +111,9 @@ export default function AppointmentsPage() {
       setFormData({ patientName: "", doctorId: "", time_slot: "" });
       setTimeout(() => setSuccessMessage(""), 3000);
       fetchAppointments();
-    } catch (error: any) {
-      setErrorMessage(error.message || "Error booking appointment");
+    } catch (error) {
+      console.log(error);
+      setErrorMessage("Error booking appointment");
       setTimeout(() => setErrorMessage(""), 3000);
     }
   };
@@ -141,6 +142,7 @@ export default function AppointmentsPage() {
       setSuccessMessage("Appointment deleted successfully.");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
+      console.log(err);
       setErrorMessage("Error deleting appointment");
       setTimeout(() => setErrorMessage(""), 3000);
     }

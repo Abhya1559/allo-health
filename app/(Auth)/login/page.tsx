@@ -30,6 +30,7 @@ export default function Login() {
         setError(data.error || "Login failed");
       }
     } catch (err) {
+      console.log(err);
       setError("Server error during login");
     } finally {
       setLoading(false);

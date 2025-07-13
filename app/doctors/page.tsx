@@ -11,6 +11,16 @@ type Doctor = {
   available_time: string;
 };
 
+type FormData = {
+  name: string;
+  specialization: string;
+  gender: string;
+  location: string;
+  available_time: string;
+};
+
+type FormField = keyof FormData;
+
 export default function DoctorsPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +42,7 @@ export default function DoctorsPage() {
       const data = await res.json();
       setDoctors(data);
     } catch (err) {
+      console.log(err);
       setError("Failed to fetch doctors.");
     } finally {
       setLoading(false);
@@ -64,6 +75,7 @@ export default function DoctorsPage() {
       });
       setShowAddForm(false);
     } catch (err) {
+      console.log(err);
       alert("Failed to add doctor");
     }
   };
@@ -91,6 +103,7 @@ export default function DoctorsPage() {
         available_time: "",
       });
     } catch (err) {
+      console.log(err);
       alert("Failed to update doctor");
     }
   };
@@ -110,6 +123,7 @@ export default function DoctorsPage() {
 
       await fetchDoctors();
     } catch (err) {
+      console.log(err);
       alert("Failed to delete doctor");
     }
   };
@@ -187,20 +201,21 @@ export default function DoctorsPage() {
           </button>
         )}
 
-        {/* Add Form */}
         {showAddForm && (
           <form
             onSubmit={handleAddDoctor}
             className="bg-white shadow-md rounded-lg p-6 space-y-4 max-w-md"
           >
             <h3 className="text-lg font-semibold text-gray-700">Add Doctor</h3>
-            {["name", "specialization", "gender", "location"].map((field) => (
+            {(
+              ["name", "specialization", "gender", "location"] as FormField[]
+            ).map((field) => (
               <input
                 key={field}
                 type="text"
                 placeholder={field[0].toUpperCase() + field.slice(1)}
                 className="w-full px-4 py-2 border rounded-md"
-                value={(formData as any)[field]}
+                value={formData[field]}
                 onChange={(e) =>
                   setFormData({ ...formData, [field]: e.target.value })
                 }
@@ -239,7 +254,6 @@ export default function DoctorsPage() {
           </form>
         )}
 
-        {/* Edit Form */}
         {editingDoctor && (
           <form
             onSubmit={handleEditDoctor}
@@ -248,13 +262,15 @@ export default function DoctorsPage() {
             <h3 className="text-lg font-semibold text-gray-700">
               Edit Doctor #{editingDoctor.id}
             </h3>
-            {["name", "specialization", "gender", "location"].map((field) => (
+            {(
+              ["name", "specialization", "gender", "location"] as FormField[]
+            ).map((field) => (
               <input
                 key={field}
                 type="text"
                 placeholder={field[0].toUpperCase() + field.slice(1)}
                 className="w-full px-4 py-2 border rounded-md"
-                value={(formData as any)[field]}
+                value={formData[field]}
                 onChange={(e) =>
                   setFormData({ ...formData, [field]: e.target.value })
                 }

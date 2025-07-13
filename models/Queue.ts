@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
 } from "typeorm";
 
-@Entity()
+@Entity("queues")
 export class Queue {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -17,7 +17,7 @@ export class Queue {
   queue_number!: number;
 
   @Column()
-  status!: string; // waiting | with doctor | completed
+  status!: string;
 
   @Column({ default: false })
   priority!: boolean;

@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Footer from "./Footer";
 import Link from "next/link";
 
 export default function Hero() {
@@ -17,7 +16,7 @@ export default function Hero() {
           className="flex-1 space-y-4 text-left"
         >
           <span className="inline-block bg-amber-100 text-gray-800 text-sm font-medium px-3 py-1 rounded-full">
-            India's #1 sexual health provider
+            India&apos;s #1 sexual health provider
           </span>
           <div className="text-left">
             <h1 className="text-xl tracking-tighter md:text-5xl font-bold text-gray-900">

@@ -1,9 +1,8 @@
-import { NextResponse, NextRequest } from "next/server";
 import { initDB } from "@/lib/init-db";
 import { Queue } from "@/models/Queue";
-import { error } from "console";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const db = await initDB();
 
   try {
@@ -48,7 +47,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("server error");
+    console.error("server error", error);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

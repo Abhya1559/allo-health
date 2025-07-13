@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import { Doctor } from "./Doctor";
 
-@Entity()
+@Entity("appointments")
 export class Appointment {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -24,8 +24,8 @@ export class Appointment {
   time_slot!: Date;
 
   @Column()
-  status!: string; // booked | completed | cancelled
+  status!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamp" })
   created_at!: Date;
 }

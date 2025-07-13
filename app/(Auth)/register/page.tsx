@@ -36,6 +36,7 @@ export default function Register() {
         setError(data.error || "Registration failed");
       }
     } catch (err) {
+      console.log(err);
       setError("Server error during registration");
     } finally {
       setLoading(false);

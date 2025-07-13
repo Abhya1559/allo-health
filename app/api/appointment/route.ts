@@ -3,7 +3,7 @@ import { initDB } from "@/lib/init-db";
 import { Appointment } from "@/models/Appointment";
 import { Doctor } from "@/models/Doctor";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const db = await initDB();
     const appointmentRepo = db.getRepository(Appointment);

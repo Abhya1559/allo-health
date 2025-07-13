@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface QueueEntry {
   id: number;
@@ -16,25 +16,62 @@ export default function QueuePage() {
   const [formData, setFormData] = useState({ patient_name: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const queueRef = useRef<QueueEntry[]>([]);
 
-  useEffect(() => {
-    fetchQueue();
-    const interval = setInterval(autoCompleteDoctorSessions, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchQueue = async () => {
+  const fetchQueue = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/queue");
       const data = await res.json();
       setQueue(data);
+      queueRef.current = data;
     } catch (err) {
+      console.error(err);
       setError("Failed to fetch queue data.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const updateStatus = useCallback(
+    async (id: number, status: QueueEntry["status"]) => {
+      try {
+        const res = await fetch(`/api/queue/${id}/status`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          const newQueue = queueRef.current.map((entry) =>
+            entry.id === id ? { ...entry, status } : entry
+          );
+          setQueue(newQueue);
+          queueRef.current = newQueue;
+        } else {
+          setError(result.error || "Error updating status");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Server error while updating status");
+      }
+    },
+    []
+  );
+
+  const autoCompleteDoctorSessions = useCallback(async () => {
+    const now = new Date();
+    for (const entry of queueRef.current) {
+      if (entry.status === "with doctor" && entry.updatedAt) {
+        const updatedAt = new Date(entry.updatedAt);
+        const diff = (now.getTime() - updatedAt.getTime()) / 1000 / 60;
+        if (diff >= 15) {
+          await updateStatus(entry.id, "completed");
+        }
+      }
+    }
+  }, [updateStatus]);
 
   const addToQueue = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,34 +89,16 @@ export default function QueuePage() {
 
       const result = await res.json();
       if (res.ok) {
-        setQueue((prev) => [...prev, result.queue]);
+        const newQueue = [...queueRef.current, result.queue];
+        setQueue(newQueue);
+        queueRef.current = newQueue;
         setFormData({ patient_name: "" });
       } else {
         setError(result.error || "Error adding to queue");
       }
     } catch (err) {
+      console.error(err);
       setError("Server error while adding to queue");
-    }
-  };
-
-  const updateStatus = async (id: number, status: QueueEntry["status"]) => {
-    try {
-      const res = await fetch(`/api/queue/${id}/status`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        setQueue((prev) =>
-          prev.map((entry) => (entry.id === id ? { ...entry, status } : entry))
-        );
-      } else {
-        setError(result.error || "Error updating status");
-      }
-    } catch (err) {
-      setError("Server error while updating status");
     }
   };
 
@@ -87,26 +106,16 @@ export default function QueuePage() {
     try {
       const res = await fetch(`/api/queue/serve/${id}`, { method: "DELETE" });
       if (res.ok) {
-        setQueue((prev) => prev.filter((entry) => entry.id !== id));
+        const newQueue = queueRef.current.filter((entry) => entry.id !== id);
+        setQueue(newQueue);
+        queueRef.current = newQueue;
       } else {
         const result = await res.json();
         setError(result.message || "Failed to delete entry");
       }
     } catch (err) {
+      console.error(err);
       setError("Server error while removing patient");
-    }
-  };
-
-  const autoCompleteDoctorSessions = async () => {
-    const now = new Date();
-    for (const entry of queue) {
-      if (entry.status === "with doctor" && entry.updatedAt) {
-        const updatedAt = new Date(entry.updatedAt);
-        const diff = (now.getTime() - updatedAt.getTime()) / 1000 / 60; // in minutes
-        if (diff >= 15) {
-          await updateStatus(entry.id, "completed");
-        }
-      }
     }
   };
 
@@ -121,6 +130,12 @@ export default function QueuePage() {
         return `${base} bg-green-100 text-green-800`;
     }
   };
+
+  useEffect(() => {
+    fetchQueue();
+    const interval = setInterval(autoCompleteDoctorSessions, 60000);
+    return () => clearInterval(interval);
+  }, [fetchQueue, autoCompleteDoctorSessions]);
 
   return (
     <div className="mt-15 min-h-screen bg-gray-50 py-12 px-6 sm:px-12">
@@ -149,7 +164,7 @@ export default function QueuePage() {
           />
           <button
             type="submit"
-            className="bg-purple-600 cursor-pointer text-white px-6 py-2 rounded-md hover:bg-purple-700 transition"
+            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 transition"
           >
             Add
           </button>
@@ -157,53 +172,49 @@ export default function QueuePage() {
 
         {loading ? (
           <p className="text-center text-gray-500 italic">Loading queue...</p>
+        ) : queue.length === 0 ? (
+          <p className="text-center text-gray-500 italic">
+            No patients in the queue.
+          </p>
         ) : (
           <div className="space-y-4">
-            {queue.length === 0 ? (
-              <p className="text-center text-gray-500 italic">
-                No patients in the queue.
-              </p>
-            ) : (
-              queue.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex justify-between items-center bg-white shadow-sm p-5 rounded-md hover:shadow-md transition"
-                >
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800">
-                      #{entry.queue_number} - {entry.patient_name}
-                    </h4>
-                    <p className={getStatusBadge(entry.status)}>
-                      {entry.status}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    {entry.status === "waiting" && (
-                      <button
-                        onClick={() => updateStatus(entry.id, "with doctor")}
-                        className="text-blue-600 cursor-pointer hover:underline font-medium"
-                      >
-                        With Doctor
-                      </button>
-                    )}
-                    {entry.status === "with doctor" && (
-                      <button
-                        onClick={() => updateStatus(entry.id, "completed")}
-                        className="text-green-600 cursor-pointer hover:underline font-medium"
-                      >
-                        Complete
-                      </button>
-                    )}
-                    <button
-                      onClick={() => removeEntry(entry.id)}
-                      className="text-red-500 cursor-pointer hover:underline font-medium"
-                    >
-                      Remove
-                    </button>
-                  </div>
+            {queue.map((entry) => (
+              <div
+                key={entry.id}
+                className="flex justify-between items-center bg-white shadow-sm p-5 rounded-md hover:shadow-md transition"
+              >
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800">
+                    #{entry.queue_number} - {entry.patient_name}
+                  </h4>
+                  <p className={getStatusBadge(entry.status)}>{entry.status}</p>
                 </div>
-              ))
-            )}
+                <div className="flex gap-2">
+                  {entry.status === "waiting" && (
+                    <button
+                      onClick={() => updateStatus(entry.id, "with doctor")}
+                      className="text-blue-600 hover:underline font-medium"
+                    >
+                      With Doctor
+                    </button>
+                  )}
+                  {entry.status === "with doctor" && (
+                    <button
+                      onClick={() => updateStatus(entry.id, "completed")}
+                      className="text-green-600 hover:underline font-medium"
+                    >
+                      Complete
+                    </button>
+                  )}
+                  <button
+                    onClick={() => removeEntry(entry.id)}
+                    className="text-red-500 hover:underline font-medium"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

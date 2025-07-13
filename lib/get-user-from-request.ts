@@ -1,6 +1,6 @@
 // lib/get-user-from-request.ts
 import { verifyJwt } from "@/lib/jwt";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 /**
  * Extracts the JWT token from the Authorization header and verifies it.

@@ -1,9 +1,8 @@
-import { NextResponse, NextRequest } from "next/server";
 import { initDB } from "@/lib/init-db";
+import { signJwt } from "@/lib/jwt";
 import { User } from "@/models/User";
 import bcrypt from "bcrypt";
-import { signJwt } from "@/lib/jwt";
-import { cookies } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {

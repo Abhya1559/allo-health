@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import { initDB } from "@/lib/init-db";
 import { Doctor } from "@/models/Doctor";
-import { ILike } from "typeorm";
+import { FindOptionsWhere, ILike } from "typeorm";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const location = searchParams.get("location");
     const available_time = searchParams.get("available_time");
 
-    const where: any = {};
+    const where: FindOptionsWhere<Doctor> = {};
 
     if (specialization) where.specialization = ILike(`%${specialization}%`);
     if (location) where.location = ILike(`%${location}%`);
