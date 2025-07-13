@@ -31,7 +31,7 @@ export default function LogoutButton(props: LogoutButtonProps) {
     <button
       onClick={handleLogout}
       disabled={loading}
-      className="flex items-center gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300 ease-in-out disabled:opacity-50"
+      className="flex items-center gap-2 bg-gradient-to-r cursor-pointer from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold px-5 py-2 rounded-full shadow-md transition-all duration-300 ease-in-out disabled:opacity-50"
     >
       {loading ? (
         <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-4 h-4"></span>

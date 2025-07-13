@@ -39,6 +39,7 @@ export default function DoctorsPage() {
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchDoctors();
   }, []);
 
